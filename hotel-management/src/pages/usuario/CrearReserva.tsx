@@ -4,6 +4,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { Habitacion } from '@/types'
 import { Calendar, Users, CreditCard, AlertCircle, CheckCircle } from 'lucide-react'
+import { getWeather } from '@/api/weather'
+
+
 
 export const CrearReserva = () => {
   const { id } = useParams()
@@ -26,6 +29,10 @@ export const CrearReserva = () => {
   const [loading, setLoading] = useState(false)
   const [total, setTotal] = useState(0)
 
+  const [weather, setWeather] = useState<any>(null)
+  const [loadingWeather, setLoadingWeather] = useState(false)
+
+
   useEffect(() => {
     // Solo carga la habitación si tenemos el ID Y la autenticación está lista
     if (id && !authLoading) { 
@@ -36,6 +43,46 @@ export const CrearReserva = () => {
   useEffect(() => {
     calcularTotal()
   }, [fechaEntrada, fechaSalida, habitacion])
+
+  useEffect(() => {
+  if (fechaEntrada && fechaSalida) {
+    consultarClima()
+  }
+}, [fechaEntrada, fechaSalida])
+
+  const consultarClima = async () => {
+  try {
+    setLoadingWeather(true)
+    setWeather(null)
+    const data = await getWeather('Salta') // o usar la ciudad del hotel dinámicamente
+
+    // Agrupar por fecha
+    const pronosticoDiario: Record<string, any[]> = {}
+    data.list.forEach((item: any) => {
+      const fecha = item.dt_txt.split(' ')[0]
+      if (!pronosticoDiario[fecha]) pronosticoDiario[fecha] = []
+      pronosticoDiario[fecha].push(item)
+    })
+
+    // Resumir cada día (promedio temperatura + descripción principal)
+    const resumen = Object.keys(pronosticoDiario).map((fecha) => {
+      const valores = pronosticoDiario[fecha]
+      const tempPromedio =
+        valores.reduce((acc, curr) => acc + curr.main.temp, 0) / valores.length
+      const descripcion = valores[0].weather[0].description
+      return { fecha, tempPromedio: tempPromedio.toFixed(1), descripcion }
+    })
+
+    setWeather(resumen)
+  } catch (err) {
+    console.error('Error al consultar el clima', err)
+  } finally {
+    setLoadingWeather(false)
+  }
+}
+
+
+
 
   const cargarHabitacion = async () => {
     try {
@@ -293,6 +340,31 @@ export const CrearReserva = () => {
                 </div>
               </div>
             )}
+          {/* 🔹 Pronóstico extendido de clima */}
+{loadingWeather && (
+  <p className="mt-2 text-slate-500">Consultando clima...</p>
+)}
+
+{weather && (
+  <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 text-slate-700">
+    <h3 className="font-semibold mb-3">Pronóstico durante tu estadía:</h3>
+    {weather.map((dia: any) => (
+      <div key={dia.fecha} className="border-b border-blue-100 py-1">
+        <p>
+          📅 {new Date(dia.fecha).toLocaleDateString('es-ES', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+          })}
+        </p>
+        <p>🌡️ Temp. promedio: {dia.tempPromedio} °C</p>
+        <p>☁️ {dia.descripcion}</p>
+      </div>
+    ))}
+  </div>
+)}
+
+
 
             <button
               onClick={validarDisponibilidad}
