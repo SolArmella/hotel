@@ -297,31 +297,6 @@ export const CrearReserva = () => {
                 </div>
               </div>
             )}
-          {/* 🔹 Pronóstico extendido de clima */}
-{loadingWeather && (
-  <p className="mt-2 text-slate-500">Consultando clima...</p>
-)}
-
-{weather && (
-  <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 text-slate-700">
-    <h3 className="font-semibold mb-3">Pronóstico durante tu estadía:</h3>
-    {weather.map((dia: any) => (
-      <div key={dia.fecha} className="border-b border-blue-100 py-1">
-        <p>
-          📅 {new Date(dia.fecha).toLocaleDateString('es-ES', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-          })}
-        </p>
-        <p>🌡️ Temp. promedio: {dia.tempPromedio} °C</p>
-        <p>☁️ {dia.descripcion}</p>
-      </div>
-    ))}
-  </div>
-)}
-
-
 
             <button
               onClick={validarDisponibilidad}
