@@ -520,49 +520,7 @@ const consultarClima = async () => {
               </div>
             </div>
 
-            {/* 🔹 Conversor de moneda */}
-<div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-  <h3 className="font-semibold mb-3">Conversión de Moneda</h3>
-  <p className="text-sm text-slate-600 mb-2">
-    Ver cuánto equivale el total en otra moneda:
-  </p>
-
-  <div className="flex gap-3 items-center">
-    <select
-      onChange={async (e) => {
-        const to = e.target.value
-        if (!to) return
-        setConversion(null)
-        const result = await convertCurrency("ARS", to, total)
-        if (result) {
-          setConversion({ valor: result, moneda: to })
-        } else {
-          setConversion(null)
-        }
-      }}
-      className="px-3 py-2 border border-slate-300 rounded-lg"
-    >
-      <option value="">Seleccionar moneda</option>
-      <option value="USD">Dólar estadounidense (USD)</option>
-      <option value="EUR">Euro (EUR)</option>
-      <option value="BRL">Real brasileño (BRL)</option>
-      <option value="CLP">Peso chileno (CLP)</option>
-      <option value="PYG">Guaraní paraguayo (PYG)</option>
-    </select>
-  </div>
-
-  {conversion && (
-    <div className="mt-3 p-3 bg-white border border-blue-100 rounded-lg shadow-sm">
-      <p className="text-slate-700 text-sm">
-        💱 <strong>{total.toLocaleString("es-ES")} ARS</strong> equivale a:
-      </p>
-      <p className="text-xl font-semibold text-blue-700 mt-1">
-        {conversion.valor.toFixed(2)} {conversion.moneda}
-      </p>
-    </div>
-  )}
-</div>
-
+         
 
             <div className="flex gap-4">
               <button
