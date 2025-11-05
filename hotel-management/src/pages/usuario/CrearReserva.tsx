@@ -4,8 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { Habitacion } from '@/types'
 import { Calendar, Users, CreditCard, AlertCircle, CheckCircle } from 'lucide-react'
-import { getWeather } from '@/api/weather'
-import { convertCurrency } from '@/api/exchange'
+
 
 
 
@@ -29,11 +28,6 @@ export const CrearReserva = () => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [total, setTotal] = useState(0)
-
-  const [weather, setWeather] = useState<any>(null)
-  const [loadingWeather, setLoadingWeather] = useState(false)
-const [conversion, setConversion] = useState<{ valor: number; moneda: string } | null>(null)
-
 
   useEffect(() => {
     // Solo carga la habitación si tenemos el ID Y la autenticación está lista
