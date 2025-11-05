@@ -40,55 +40,6 @@ export const CrearReserva = () => {
     calcularTotal()
   }, [fechaEntrada, fechaSalida, habitacion])
 
-  useEffect(() => {
-  if (fechaEntrada && fechaSalida) {
-    consultarClima()
-  }
-}, [fechaEntrada, fechaSalida])
-
-  const consultarClima = async () => {
-  try {
-    if (!fechaEntrada || !fechaSalida) return
-    setLoadingWeather(true)
-    setWeather(null)
-
-    const entrada = new Date(fechaEntrada)
-    const salida = new Date(fechaSalida)
-
-    const data = await getWeather('Salta')
-
-    // Filtrar los días del pronóstico que estén dentro del rango elegido
-    const pronosticoFiltrado = data.list.filter((item: any) => {
-      const fechaItem = new Date(item.dt_txt)
-      return fechaItem >= entrada && fechaItem <= salida
-    })
-
-    // Agrupar por fecha
-    const pronosticoDiario: Record<string, any[]> = {}
-    pronosticoFiltrado.forEach((item: any) => {
-      const fecha = item.dt_txt.split(' ')[0]
-      if (!pronosticoDiario[fecha]) pronosticoDiario[fecha] = []
-      pronosticoDiario[fecha].push(item)
-    })
-
-    // Resumir cada día
-    const resumen = Object.keys(pronosticoDiario).map((fecha) => {
-      const valores = pronosticoDiario[fecha]
-      const tempPromedio =
-        valores.reduce((acc, curr) => acc + curr.main.temp, 0) / valores.length
-      const descripcion = valores[0].weather[0].description
-      return { fecha, tempPromedio: tempPromedio.toFixed(1), descripcion }
-    })
-
-    setWeather(resumen)
-  } catch (err) {
-    console.error('Error al consultar el clima', err)
-  } finally {
-    setLoadingWeather(false)
-  }
-}
-
-
 
   const cargarHabitacion = async () => {
     try {
