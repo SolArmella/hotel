@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Sparkles, Bed, Utensils, Dumbbell, Waves, Calendar, Phone } from 'lucide-react'
+import { Sparkles, Bed, Utensils, Dumbbell, Waves } from 'lucide-react'
 
 export const Home = () => {
   return (
@@ -68,7 +68,7 @@ export const Home = () => {
             <ServiceCard
               icon={<Waves className="h-8 w-8" />}
               title="Spa & Wellness"
-              description="Relajácio y tratamientos premium"
+              description="Relajación y tratamientos premium"
             />
             <ServiceCard
               icon={<Dumbbell className="h-8 w-8" />}
@@ -107,6 +107,50 @@ export const Home = () => {
               title="Suite de Lujo"
               price="$120,000"
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Mapa de Ubicación */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-serif font-bold text-slate-900 mb-4">
+              📍 Nuestra Ubicación
+            </h2>
+            <p className="text-lg text-slate-600">
+              Elegance Hotel Mar del Plata — a pasos del mar y del centro de la ciudad.
+            </p>
+          </div>
+
+          <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-200 max-w-5xl mx-auto">
+            <iframe
+              title="Ubicación del Hotel Elegance Mar del Plata"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3142.790678787817!2d-57.5361134!3d-38.028659100000006!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9584ddcbf41a77eb%3A0xe081b818bfd75cef!2sElegance%20Hotel%20Mar%20del%20Plata!5e0!3m2!1ses!2sar!4v1762322682172!5m2!1ses!2sar"
+              width="100%"
+              height="400"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+
+          <div className="text-center mt-6 space-y-2">
+            <p className="text-slate-700 text-lg">
+              📞 <strong>Teléfono:</strong> +54 223 492-0000
+            </p>
+            <p className="text-slate-700 text-lg">
+              🕓 <strong>Horario:</strong> Lunes a Domingo, 8:00 a 22:00
+            </p>
+            <a
+              href="https://www.google.com/maps/place/Elegance+Hotel+Mar+del+Plata"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-4 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold rounded-lg shadow-lg transition-all"
+            >
+              Ver en Google Maps
+            </a>
           </div>
         </div>
       </section>
@@ -159,3 +203,4 @@ const RoomCard = ({ image, title, price }: { image: string; title: string; price
     </div>
   </div>
 )
+
