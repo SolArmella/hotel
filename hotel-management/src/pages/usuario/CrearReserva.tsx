@@ -52,7 +52,7 @@ const [conversion, setConversion] = useState<{ valor: number; moneda: string } |
   }
 }, [fechaEntrada, fechaSalida])
 
-const consultarClima = async () => {
+  const consultarClima = async () => {
   try {
     if (!fechaEntrada || !fechaSalida) return
     setLoadingWeather(true)
@@ -60,35 +60,31 @@ const consultarClima = async () => {
 
     const entrada = new Date(fechaEntrada)
     const salida = new Date(fechaSalida)
-    const dias = Math.ceil((salida.getTime() - entrada.getTime()) / (1000 * 60 * 60 * 24))
 
-    // Pedimos el pronóstico para los días de la estadía
     const data = await getWeather('Salta')
+
+    // Filtrar los días del pronóstico que estén dentro del rango elegido
+    const pronosticoFiltrado = data.list.filter((item: any) => {
+      const fechaItem = new Date(item.dt_txt)
+      return fechaItem >= entrada && fechaItem <= salida
+    })
 
     // Agrupar por fecha
     const pronosticoDiario: Record<string, any[]> = {}
-    data.list.forEach((item: any) => {
+    pronosticoFiltrado.forEach((item: any) => {
       const fecha = item.dt_txt.split(' ')[0]
       if (!pronosticoDiario[fecha]) pronosticoDiario[fecha] = []
       pronosticoDiario[fecha].push(item)
     })
 
-    // Filtrar los días que coinciden con la estadía del usuario
-    const fechasEstadia: string[] = []
-    for (let i = 0; i < dias; i++) {
-      const fechaActual = new Date(entrada)
-      fechaActual.setDate(entrada.getDate() + i)
-      fechasEstadia.push(fechaActual.toISOString().split('T')[0])
-    }
-
-    // Resumir y mostrar solo esos días
-    const resumen = fechasEstadia.map(fecha => {
+    // Resumir cada día
+    const resumen = Object.keys(pronosticoDiario).map((fecha) => {
       const valores = pronosticoDiario[fecha]
-      if (!valores) return null
-      const tempPromedio = valores.reduce((acc, curr) => acc + curr.main.temp, 0) / valores.length
+      const tempPromedio =
+        valores.reduce((acc, curr) => acc + curr.main.temp, 0) / valores.length
       const descripcion = valores[0].weather[0].description
       return { fecha, tempPromedio: tempPromedio.toFixed(1), descripcion }
-    }).filter(Boolean)
+    })
 
     setWeather(resumen)
   } catch (err) {
