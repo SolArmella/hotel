@@ -52,11 +52,18 @@ const [conversion, setConversion] = useState<{ valor: number; moneda: string } |
   }
 }, [fechaEntrada, fechaSalida])
 
-  const consultarClima = async () => {
+const consultarClima = async () => {
   try {
+    if (!fechaEntrada || !fechaSalida) return
     setLoadingWeather(true)
     setWeather(null)
-    const data = await getWeather('Salta') // o usar la ciudad del hotel dinámicamente
+
+    const entrada = new Date(fechaEntrada)
+    const salida = new Date(fechaSalida)
+    const dias = Math.ceil((salida.getTime() - entrada.getTime()) / (1000 * 60 * 60 * 24))
+
+    // Pedimos el pronóstico para los días de la estadía
+    const data = await getWeather('Salta')
 
     // Agrupar por fecha
     const pronosticoDiario: Record<string, any[]> = {}
@@ -66,14 +73,22 @@ const [conversion, setConversion] = useState<{ valor: number; moneda: string } |
       pronosticoDiario[fecha].push(item)
     })
 
-    // Resumir cada día (promedio temperatura + descripción principal)
-    const resumen = Object.keys(pronosticoDiario).map((fecha) => {
+    // Filtrar los días que coinciden con la estadía del usuario
+    const fechasEstadia: string[] = []
+    for (let i = 0; i < dias; i++) {
+      const fechaActual = new Date(entrada)
+      fechaActual.setDate(entrada.getDate() + i)
+      fechasEstadia.push(fechaActual.toISOString().split('T')[0])
+    }
+
+    // Resumir y mostrar solo esos días
+    const resumen = fechasEstadia.map(fecha => {
       const valores = pronosticoDiario[fecha]
-      const tempPromedio =
-        valores.reduce((acc, curr) => acc + curr.main.temp, 0) / valores.length
+      if (!valores) return null
+      const tempPromedio = valores.reduce((acc, curr) => acc + curr.main.temp, 0) / valores.length
       const descripcion = valores[0].weather[0].description
       return { fecha, tempPromedio: tempPromedio.toFixed(1), descripcion }
-    })
+    }).filter(Boolean)
 
     setWeather(resumen)
   } catch (err) {
@@ -82,7 +97,6 @@ const [conversion, setConversion] = useState<{ valor: number; moneda: string } |
     setLoadingWeather(false)
   }
 }
-
 
 
 
