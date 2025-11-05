@@ -1,7 +1,25 @@
 import { Link } from 'react-router-dom'
 import { Sparkles, Bed, Utensils, Dumbbell, Waves } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import axios from 'axios'
 
 export const Home = () => {
+  const [weather, setWeather] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const response = await axios.get(
+          `https://api.openweathermap.org/data/2.5/weather?q=Mar del Plata,AR&appid=f277db048667f22e3022f7882021908d&units=metric&lang=es`
+        )
+        setWeather(response.data)
+      } catch (error) {
+        console.error('Error obteniendo el clima:', error)
+      }
+    }
+    fetchWeather()
+  }, [])
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -13,7 +31,7 @@ export const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 to-slate-800/70" />
         </div>
         
-        <div className="relative h-full flex items-center justify-center text-center px-4">
+        <div className="relative h-full flex flex-col items-center justify-center text-center px-4">
           <div className="max-w-4xl">
             <h1 className="text-5xl md:text-7xl font-serif font-bold text-white mb-6">
               Bienvenido a
@@ -21,10 +39,30 @@ export const Home = () => {
                 Hotel Elegance
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-slate-200 mb-8 font-light">
+            <p className="text-xl md:text-2xl text-slate-200 mb-4 font-light">
               Donde el lujo se encuentra con la comodidad
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+            {/* 🌦️ Widget del Clima */}
+            {weather && (
+              <div className="flex justify-center items-center gap-3 mb-6 bg-white/10 backdrop-blur-md px-6 py-3 rounded-xl border border-white/20 w-fit mx-auto">
+                <img
+                  src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}.png`}
+                  alt="icono clima"
+                  className="w-10 h-10"
+                />
+                <div className="text-left text-slate-100">
+                  <p className="font-semibold text-lg capitalize">
+                    {weather.weather[0].description}
+                  </p>
+                  <p className="text-sm">
+                    🌡️ {weather.main.temp.toFixed(1)} °C en {weather.name}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-2">
               <Link
                 to="/register"
                 className="px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold rounded-lg shadow-2xl transition-all text-lg"
@@ -203,4 +241,3 @@ const RoomCard = ({ image, title, price }: { image: string; title: string; price
     </div>
   </div>
 )
-
