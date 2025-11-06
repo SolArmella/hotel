@@ -161,37 +161,38 @@ const GestionHabitaciones = ({
     setShowModal(true)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    const dataToSave = {
-      numero: formData.numero,
-      tipo: formData.tipo,
-      precio_noche: parseFloat(formData.precio_noche),
-      capacidad: parseInt(formData.capacidad),
-      amenidades: formData.amenidades.split(',').map(a => a.trim()),
-      descripcion: formData.descripcion,
-      estado: formData.estado
-    }
+  const [errorNombre, setErrorNombre] = useState('')
 
-    try {
-      if (editando) {
-        await supabase
-          .from('habitaciones')
-          .update(dataToSave)
-          .eq('id', editando.id)
-      } else {
-        await supabase
-          .from('habitaciones')
-          .insert([dataToSave])
-      }
-      
-      resetForm()
-      onRecargar()
-    } catch (error) {
-      console.error('Error guardando habitación:', error)
-    }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setErrorNombre('')
+
+  // 🔹 Validación de nombre antes de enviar
+  if (!formData.nombre.trim()) {
+    setErrorNombre('El nombre no puede estar vacío.')
+    return
   }
+  if (formData.nombre.trim().length < 3) {
+    setErrorNombre('El nombre debe tener al menos 3 caracteres.')
+    return
+  }
+
+  try {
+    await supabase
+      .from('usuarios')
+      .insert([{
+        ...formData,
+        rol: 'operador'
+      }])
+    
+    setFormData({ email: '', nombre: '', password: '' })
+    setShowModal(false)
+    onRecargar()
+  } catch (error) {
+    console.error('Error creando operador:', error)
+  }
+}
+
 
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de eliminar esta habitación?')) return
@@ -405,10 +406,37 @@ const GestionOperadores = ({
     nombre: '',
     password: ''
   })
+  const [errores, setErrores] = useState<{ nombre?: string; email?: string; password?: string }>({})
+
+  const validarFormulario = () => {
+    const nuevosErrores: { nombre?: string; email?: string; password?: string } = {}
+
+    if (!formData.nombre.trim()) {
+      nuevosErrores.nombre = 'El nombre no puede estar vacío.'
+    } else if (formData.nombre.trim().length < 3) {
+      nuevosErrores.nombre = 'El nombre debe tener al menos 3 caracteres.'
+    }
+
+    if (!formData.email.trim()) {
+      nuevosErrores.email = 'El email es obligatorio.'
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      nuevosErrores.email = 'El formato del email no es válido.'
+    }
+
+    if (!formData.password.trim()) {
+      nuevosErrores.password = 'La contraseña es obligatoria.'
+    } else if (formData.password.trim().length < 6) {
+      nuevosErrores.password = 'La contraseña debe tener al menos 6 caracteres.'
+    }
+
+    setErrores(nuevosErrores)
+    return Object.keys(nuevosErrores).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+    if (!validarFormulario()) return
+
     try {
       await supabase
         .from('usuarios')
@@ -473,11 +501,13 @@ const GestionOperadores = ({
         ))}
       </div>
 
+      {/* Modal Crear Operador */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl p-6 max-w-md w-full">
             <h2 className="text-2xl font-bold mb-6">Nuevo Operador</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
+              
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Nombre
@@ -486,10 +516,14 @@ const GestionOperadores = ({
                   type="text"
                   value={formData.nombre}
                   onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                  className={`w-full px-4 py-2 border ${errores.nombre ? 'border-red-400' : 'border-slate-300'} rounded-lg focus:ring-2 focus:ring-amber-500 outline-none`}
                   required
                 />
+                {errores.nombre && (
+                  <p className="text-red-600 text-sm mt-1">{errores.nombre}</p>
+                )}
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Email
@@ -498,10 +532,14 @@ const GestionOperadores = ({
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                  className={`w-full px-4 py-2 border ${errores.email ? 'border-red-400' : 'border-slate-300'} rounded-lg focus:ring-2 focus:ring-amber-500 outline-none`}
                   required
                 />
+                {errores.email && (
+                  <p className="text-red-600 text-sm mt-1">{errores.email}</p>
+                )}
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Contraseña
@@ -510,11 +548,14 @@ const GestionOperadores = ({
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+                  className={`w-full px-4 py-2 border ${errores.password ? 'border-red-400' : 'border-slate-300'} rounded-lg focus:ring-2 focus:ring-amber-500 outline-none`}
                   required
-                  minLength={6}
                 />
+                {errores.password && (
+                  <p className="text-red-600 text-sm mt-1">{errores.password}</p>
+                )}
               </div>
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
@@ -537,6 +578,7 @@ const GestionOperadores = ({
     </div>
   )
 }
+
 
 const Estadisticas = ({ 
   habitaciones, 
