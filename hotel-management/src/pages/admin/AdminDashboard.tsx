@@ -161,29 +161,38 @@ const GestionHabitaciones = ({
     setShowModal(true)
   }
 
-  const [errorNombre, setErrorNombre] = useState('')
-
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
-  setErrorNombre('')
-
-  // 🔹 Validación de nombre antes de enviar
-  if (!formData.nombre.trim()) {
-    setErrorNombre('El nombre no puede estar vacío.')
-    return
-  }
-  if (formData.nombre.trim().length < 3) {
-    setErrorNombre('El nombre debe tener al menos 3 caracteres.')
-    return
+  
+  const dataToSave = {
+    numero: formData.numero,
+    tipo: formData.tipo,
+    precio_noche: parseFloat(formData.precio_noche),
+    capacidad: parseInt(formData.capacidad),
+    amenidades: formData.amenidades.split(',').map(a => a.trim()),
+    descripcion: formData.descripcion,
+    estado: formData.estado
   }
 
   try {
-    await supabase
-      .from('usuarios')
-      .insert([{
-        ...formData,
-        rol: 'operador'
-      }])
+    if (editando) {
+      await supabase
+        .from('habitaciones')
+        .update(dataToSave)
+        .eq('id', editando.id)
+    } else {
+      await supabase
+        .from('habitaciones')
+        .insert([dataToSave])
+    }
+    
+    resetForm()
+    onRecargar()
+  } catch (error) {
+    console.error('Error guardando habitación:', error)
+  }
+}
+
     
     setFormData({ email: '', nombre: '', password: '' })
     setShowModal(false)
